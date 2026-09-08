@@ -50,7 +50,7 @@
 ```yaml
 ---
 schema: profile.v3
-test_type: academic        # academic | general
+test_type: academic        # 固定 academic：v3.1 仅支持 Academic，General 见路线图（schema 枚举保留 general 以兼容旧数据）
 target_band: 7.0
 exam_date: 2026-09-20      # 不确定时可写 null
 daily_minutes: 120         # 每天可投入的分钟数

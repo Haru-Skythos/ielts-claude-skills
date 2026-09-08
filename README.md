@@ -1,9 +1,11 @@
-# IELTS Claude Skills · v3.0
+# IELTS Claude Skills · v3.1
 
 > 一套跑在 Claude Code 上的、**有记忆的**雅思备考 AI 教练系统。
 > 8 个 skill · 本地数据持久化 · 可视化 Dashboard · 错题本 · 间隔重复词汇 · 数据驱动备考计划。
 >
-> 基于 [YANZHANLIN/ielts-claude-skills](https://github.com/YANZHANLIN/ielts-claude-skills) v1.0（MIT License）自建实现的 v3.0 完整版。纯本地运行，没有任何云端依赖，你的所有学习数据都只存在你自己的电脑上。
+> 基于 [YANZHANLIN/ielts-claude-skills](https://github.com/YANZHANLIN/ielts-claude-skills) v1.0（MIT License）自建实现的 v3.1 完整版。纯本地运行，没有任何云端依赖，你的所有学习数据都只存在你自己的电脑上。
+>
+> **v3.1 增量**：今日建议算法统一（实现与文档同一套 `subjectTargets`，附单测）、词汇复习日志（`vocab/log.md` 全链路）、可复现评测 harness（`evals/`）与知识漂移 lint（`scripts/lint-sync.mjs`）。
 
 ---
 
@@ -38,7 +40,7 @@
 | `/ielts-reading` | T/F/NG 逻辑拆解 + 错题诊断，同义替换跨篇入库 | 「这道为什么错」+ 粘贴文章和答案 |
 | `/ielts-listening` | 听力题型追踪 + 错因诊断 + 精听任务生成 | 「剑 19 T1 错了 10 个」+ 错题清单 |
 | `/ielts-speaking` | 万能故事库（跨会话复用）+ Part 3 预测 + 表达升级 | 「Part 2 描述一次旅行怎么准备」 |
-| `/ielts-vocab` | 生词本 Leitner 间隔重复 + 同义替换专项测验 | 「今天复习单词」「考考我」 |
+| `/ielts-vocab` | 生词本 Leitner 间隔重复 + 同义替换专项测验，复习结算写入 `vocab/log.md` 复习日志 | 「今天复习单词」「考考我」 |
 | `/ielts-plan` | 聚合全部数据做诊断，生成落实到天的训练计划 | 「我现在什么水平」「帮我做计划」 |
 | `/ielts-dashboard` | 本地 React 可视化 + 数据体检 + 状态栏安装 | 「看看我的进度」「打开 dashboard」 |
 
@@ -69,6 +71,8 @@
 ---
 
 ## 系统要求
+
+> **Academic-only 声明**：当前版本（v3.1）仅支持 **Academic（A 类）**——写作 Task 1 指导与评分换算表均按 A 类实现。General Training（G 类）在路线图中，暂不支持。
 
 | 组件 | 要求 | 用途 |
 |------|------|------|
@@ -207,6 +211,8 @@ AI：启动本地网页 http://localhost:5173
 - **添加生词**：丢词进来，自动补全释义 / 搭配 / 雅思例句入库
 - **同义替换专项**：从累计库抽测（阅读听力的解题命脉），库存不足时用内置高频包起步
 - **主题词汇包**：按话题给产出级词汇（雅思 7 分作文用得上的，不给 GRE 冷词）
+
+每次复习结算后向 `vocab/log.md` 追加一行复习日志（日期 / 模式 / 到期数 / 正确率 / 升箱回炉统计），跨会话可回溯复习轨迹，`/ielts-plan` 与 Dashboard 也能消费。
 
 词库完全尊重你的习惯：可加自定义列（记法 / 音标），手改的释义不会被「纠正」，说「这词我熟了」就直接升箱。
 
@@ -416,6 +422,8 @@ ielts-claude-skills/
 │       ├── scripts/statusline.mjs  #   状态栏脚本（零依赖）
 │       └── src/                    #   前端（图表组件）
 ├── docs/DATA-SCHEMA.md             # 数据规范（人读版契约）
+├── evals/                          # 评测 harness（fixtures / scenarios / results）
+├── scripts/lint-sync.mjs           # 知识漂移 lint（换算表 / 标签集 / 文档路径）
 ├── install.cmd / install.sh        # 安装脚本
 ├── LICENSE                         # MIT
 └── README.md                       # 本文件
@@ -436,5 +444,6 @@ ielts-claude-skills/
 
 **版本历史**
 
+- **v3.1**（2026-09）：今日建议算法统一（subjectTargets + 单测）、词汇复习日志全链路、可复现评测 harness（evals/）+ 漂移 lint（lint-sync）、声明仅支持 Academic
 - **v3.0**（2026-07）：8 skill + 数据持久化 + Dashboard + 错题本 + 间隔重复 + 计划 + 状态栏 + 备份；数据契约 `*.v3`
 - v1.0（上游）：写作 / 阅读 / 口语 / 路由，无状态纯提示词
