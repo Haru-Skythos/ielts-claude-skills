@@ -113,6 +113,19 @@ function readWords(root) {
   }
 }
 
+function readVocabLog(root) {
+  const file = path.join(root, 'vocab', 'log.md')
+  if (!fs.existsSync(file)) return { exists: false, updated: null, rows: [] }
+  const { fm, content } = readMd(file)
+  const rows = parseTable(content).map((r) => ({
+    date: r['date'] ?? '',
+    reviewed: Number(r['reviewed'] ?? 0) || 0,
+    correct: Number(r['correct'] ?? 0) || 0,
+    wrong: Number(r['wrong'] ?? 0) || 0,
+  }))
+  return { exists: true, updated: fm.updated ?? null, rows }
+}
+
 export function loadData() {
   const root = dataRoot()
   const initialized = fs.existsSync(path.join(root, 'profile.md'))
@@ -145,5 +158,6 @@ export function loadData() {
     stories: readCollection(root, path.join('speaking', 'stories')),
     synonyms: readSynonyms(root),
     words: readWords(root),
+    vocabLog: readVocabLog(root),
   }
 }
