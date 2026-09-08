@@ -41,6 +41,7 @@ v3 和 v1 的区别：你有记忆了。所有训练记录都写在本地数据�
 ├── profile.md        # 档案（你负责创建和维护）
 ├── plan.md           # 计划（/ielts-plan 生成）
 ├── writing/ reading/ listening/ speaking/ vocab/   # 各科归档（子 skill 写入）
+│   └── vocab/log.md   # 词汇复习日志（/ielts-vocab 每次复习结算追加一行）
 ```
 
 ---
