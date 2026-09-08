@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 词汇复习日志 `vocab/log.md` 全链路（复习结算追加、跨会话回溯、plan/dashboard 可消费）
 - 可复现评测 harness `evals/`（黄金 fixtures、端到端场景、结果归档）
 - 知识漂移 lint `scripts/lint-sync.mjs`
-- 状态栏词汇标记（到期词数提醒）
+- 状态栏词汇复习标记（当日有复习记录即显示 `词✓`）
 
 ### Changed
 

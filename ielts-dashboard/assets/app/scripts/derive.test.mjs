@@ -7,6 +7,8 @@ import {
   todaySuggestion,
   listeningBand,
   readingBand,
+  vocabActivity,
+  todayStr,
 } from '../src/lib/derive.js'
 
 // ---------- subjectTargets：5 个已知算例（ielts/SKILL.md「算分公式」） ----------
@@ -62,7 +64,9 @@ test('todaySuggestion 无任何记录：建议某科且 reason 提到基线', ()
 })
 
 test('todaySuggestion 考前 3 天：听力+阅读保手感', () => {
-  const data = profileData(null, { exam_date: '2026-09-11' })
+  // exam_date 按真实时钟动态构造（今天 +3 天），避免固定日期随时间老化成时间炸弹
+  const plus3 = new Date(new Date(todayStr()).getTime() + 3 * 86400000).toISOString().slice(0, 10)
+  const data = profileData(null, { exam_date: plus3 })
   const s = todaySuggestion(data)
   assert.equal(s.subject, '听力 + 阅读')
   assert.match(s.reason, /考前 3 天/)
@@ -86,4 +90,25 @@ test('todaySuggestion 差距并列时选写作', () => {
 test('listeningBand / readingBand', () => {
   assert.equal(listeningBand(30), 7.0)
   assert.equal(readingBand(30), 7.0)
+})
+
+// ---------- subjectTargets 边界（4.0 / 9.0 特判为全科持平） ----------
+test('subjectTargets 边界 4.0 与 9.0', () => {
+  assert.deepEqual(subjectTargets(4.0), { listening: 4, reading: 4, writing: 4, speaking: 4 })
+  assert.deepEqual(subjectTargets(9.0), { listening: 9, reading: 9, writing: 9, speaking: 9 })
+})
+
+// ---------- vocabActivity：天数按「有行的天数」算，同日多行只算一天 ----------
+test('vocabActivity 同日多行只算一天', () => {
+  const today = todayStr()
+  const data = {
+    vocabLog: {
+      rows: [
+        { date: today, reviewed: 10, correct: 8, wrong: 2 },
+        { date: today, reviewed: 5, correct: 4, wrong: 1 },
+        { date: '2026-01-01', reviewed: 3, correct: 3, wrong: 0 },
+      ],
+    },
+  }
+  assert.deepEqual(vocabActivity(data), { days: 1, reviewed: 15 })
 })

@@ -162,9 +162,12 @@ export function activity(data, days = 14) {
 // 四科和为 4T−1，平均为 T−0.25，向上取整恰好等于 T，且能力分（写作口语）尽量低、
 // 技巧分（听力阅读）尽量高。已知算例：7.0→[7.5,7.5,6,6]，7.5→[8,8,6.5,6.5]，
 // 6.5→[7,7,5.5,5.5]，6.0→[6.5,6.5,5,5]，8.0→[8.5,8.5,7,7]。
+// 边界：该公式在 T=4.0 会超配（4.25→4.5）、T=9.0 会欠配（8.5<9），故两端特判为全科持平。
 export function subjectTargets(totalBand) {
-  const clamp = (x) => Math.min(9, Math.max(4, x))
   const t = totalBand ?? 6.5
+  if (t <= 4) return { listening: 4, reading: 4, writing: 4, speaking: 4 }
+  if (t >= 9) return { listening: 9, reading: 9, writing: 9, speaking: 9 }
+  const clamp = (x) => Math.min(9, Math.max(4, x))
   return {
     listening: clamp(t + 0.5),
     reading: clamp(t + 0.5),
@@ -204,14 +207,15 @@ export function todaySuggestion(data) {
   return { subject: pick.label, reason }
 }
 
-// 词汇复习日志：最近 N 天有复习记录的天数和总复习词数（vocab/log.md，有行的天才算）
+// 词汇复习日志：最近 N 天有复习记录的天数和总复习词数（vocab/log.md）。
+// 天数按「有行的天数」算（同日多行只算一天，见 DATA-SCHEMA §3.10），不是行数。
 export function vocabActivity(data, days = 14) {
   const cutoff = new Date(new Date(todayStr()).getTime() - (days - 1) * 86400000)
     .toISOString()
     .slice(0, 10)
   const rows = (data.vocabLog?.rows || []).filter((r) => r.date && r.date >= cutoff)
   return {
-    days: rows.length,
+    days: new Set(rows.map((r) => r.date)).size,
     reviewed: rows.reduce((sum, r) => sum + (r.reviewed || 0), 0),
   }
 }
