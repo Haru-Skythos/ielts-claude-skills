@@ -1,7 +1,7 @@
 # IELTS v3.0 数据规范（DATA-SCHEMA）
 
 > 这是 8 个 skill 与 Dashboard 之间的数据契约。所有读写 `~/.ielts/` 的代码和提示词都以本文档为准。
-> 机器校验的权威定义在 `ielts-dashboard/assets/app/src/schema.mjs`（zod）。
+> 机器校验的权威定义在 `ielts-dashboard/assets/app/server/schema.mjs`（zod）。
 
 ---
 
