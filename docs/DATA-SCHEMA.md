@@ -28,7 +28,8 @@
 │   └── 2026-07-26-part2-travel.md   # 练习记录
 └── vocab/
     ├── synonyms.md            # 同义替换累计库（单文件表格）
-    └── words.md               # 生词本（单文件表格，Leitner 间隔重复）
+    ├── words.md               # 生词本（单文件表格，Leitner 间隔重复）
+    └── log.md                 # 词汇复习日志（单文件表格，只追加行）
 ```
 
 ## 2. 通用规则
@@ -216,6 +217,20 @@ focus: [writing, listening]   # 当前阶段重点科目
 # 训练计划
 （按周拆分，落实到每天做什么）
 ```
+
+### 3.10 vocab/log.md（/ielts-vocab 每次复习结算后追加一行；/ielts-plan、dashboard 消费）
+
+```yaml
+---
+schema: vocab-log.v3
+updated: 2026-07-26
+---
+| date | reviewed | correct | wrong |
+|------|----------|---------|-------|
+| 2026-07-26 | 12 | 9 | 3 |
+```
+
+追加规则：**只追加行，禁止整文件重写**；每次复习结算追加一行，同日多次复习就多行；没复习的日子不写行（频次统计按「有行的天数」算）。约束：`correct + wrong = reviewed`，三个字段均为非负整数。`updated` 随每次追加更新。
 
 ## 4. 读取约定（控制上下文消耗）
 

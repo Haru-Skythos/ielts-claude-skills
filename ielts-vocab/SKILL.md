@@ -53,6 +53,20 @@ updated: 2026-07-26
 
 表结构：`| 考点词 | 替换词 | 来源 | 日期 |`
 
+### vocab/log.md（复习日志，每次复习结算后追加一行）
+
+```markdown
+---
+schema: vocab-log.v3
+updated: 2026-07-26
+---
+| date | reviewed | correct | wrong |
+|------|----------|---------|-------|
+| 2026-07-26 | 12 | 9 | 3 |
+```
+
+只追加行（每次复习结算追加一行），禁止整文件重写；同日多次复习就多行，没复习的日子不写行。`/ielts-plan` 和 dashboard 靠它统计最近 14 天的词汇复习频次。
+
 ### Leitner 盒子规则（严格执行）
 
 | box | 复习间隔 |
@@ -126,6 +140,16 @@ date -d "+4 days" +%F 2>/dev/null || date -v+4d +%F   # 4 天后（Linux/Git Bas
 ```
 
 最后更新 frontmatter 的 `updated`。
+
+### Step 5：追加复习日志
+
+向 `vocab/log.md` 追加一行（文件不存在则先按下方模板创建，含 frontmatter）：
+
+```markdown
+| 2026-07-26 | 12 | 9 | 3 |
+```
+
+**只追加行，禁止整文件重写**；同日多次复习就多行，没复习的日子不写行。
 
 ---
 
