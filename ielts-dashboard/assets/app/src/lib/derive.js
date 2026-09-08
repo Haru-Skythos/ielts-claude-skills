@@ -157,7 +157,27 @@ export function activity(data, days = 14) {
   }
 }
 
-// 今日建议（与 /ielts 的算法一致：差距最大且最近 3 天没练；并列选写作；考前 7 天保手感）
+// 单科目标配置：按 ielts/SKILL.md「算分公式」一节从总分反推。
+// 规则：总分 = 四科平均，.25/.75 向上取整到 0.5。取听力=阅读=T+0.5、写作=口语=T−1，
+// 四科和为 4T−1，平均为 T−0.25，向上取整恰好等于 T，且能力分（写作口语）尽量低、
+// 技巧分（听力阅读）尽量高。已知算例：7.0→[7.5,7.5,6,6]，7.5→[8,8,6.5,6.5]，
+// 6.5→[7,7,5.5,5.5]，6.0→[6.5,6.5,5,5]，8.0→[8.5,8.5,7,7]。
+// 边界：该公式在 T=4.0 会超配（4.25→4.5）、T=9.0 会欠配（8.5<9），故两端特判为全科持平。
+export function subjectTargets(totalBand) {
+  const t = totalBand ?? 6.5
+  if (t <= 4) return { listening: 4, reading: 4, writing: 4, speaking: 4 }
+  if (t >= 9) return { listening: 9, reading: 9, writing: 9, speaking: 9 }
+  const clamp = (x) => Math.min(9, Math.max(4, x))
+  return {
+    listening: clamp(t + 0.5),
+    reading: clamp(t + 0.5),
+    writing: clamp(t - 1),
+    speaking: clamp(t - 1),
+  }
+}
+
+// 今日建议（与 /ielts 的算法一致：差距 = 单科目标配置 − 最近水平，未知按配置−1 算；
+// 排序先差距降序，再「最近 3 天没练」优先，并列选写作；考前 7 天保手感）
 export function todaySuggestion(data) {
   const prof = data.profile
   if (!prof) return null
@@ -167,23 +187,37 @@ export function todaySuggestion(data) {
     return { subject: '听力 + 阅读', reason: `考前 ${daysLeft} 天：每天各一套保手感，写作口语只复习已有素材` }
   }
   const levels = latestLevels(data)
-  const target = prof.target_band ?? 6.5
+  const targets = subjectTargets(prof.target_band)
   const recent = new Date(new Date(today).getTime() - 2 * 86400000).toISOString().slice(0, 10)
   const practicedRecently = (records) => valid(records).some((r) => r.date >= recent)
   const prio = { writing: 4, listening: 3, reading: 2, speaking: 1 } // 并列时写作优先
   const scored = SUBJECTS.map(({ key, label }) => {
     const cur = levels[key]?.band
-    const gap = cur == null ? target : target - cur // 无数据视为最大盲区
+    // 无数据科目按「目标配置 − 1」算差距（最大盲区）
+    const gap = cur == null ? targets[key] - 1 : targets[key] - cur
     return { key, label, gap, noData: cur == null, rested: !practicedRecently(data[key]) }
   }).sort(
-    (a, b) =>
-      Number(b.rested) - Number(a.rested) || b.gap - a.gap || prio[b.key] - prio[a.key],
+    (a, b) => b.gap - a.gap || Number(b.rested) - Number(a.rested) || prio[b.key] - prio[a.key],
   )
   const pick = scored[0]
+  const fmt = (x) => (Math.round(x * 2) / 2).toFixed(1)
   const reason = pick.noData
-    ? `${pick.label}还没有任何记录，先测一次基线`
-    : `差距 ${pick.gap > 0 ? pick.gap.toFixed(1) : 0} 分${pick.rested ? '，且最近 3 天没练' : ''}`
+    ? `${pick.label}还没有任何记录，先测一次基线（距单科配置 ${fmt(targets[pick.key])} 差 ${fmt(targets[pick.key] - 1)} 分）`
+    : `距单科配置 ${fmt(targets[pick.key])} 还差 ${fmt(Math.max(0, pick.gap))} 分${pick.rested ? '，且最近 3 天没练' : ''}`
   return { subject: pick.label, reason }
+}
+
+// 词汇复习日志：最近 N 天有复习记录的天数和总复习词数（vocab/log.md）。
+// 天数按「有行的天数」算（同日多行只算一天，见 DATA-SCHEMA §3.10），不是行数。
+export function vocabActivity(data, days = 14) {
+  const cutoff = new Date(new Date(todayStr()).getTime() - (days - 1) * 86400000)
+    .toISOString()
+    .slice(0, 10)
+  const rows = (data.vocabLog?.rows || []).filter((r) => r.date && r.date >= cutoff)
+  return {
+    days: new Set(rows.map((r) => r.date)).size,
+    reviewed: rows.reduce((sum, r) => sum + (r.reviewed || 0), 0),
+  }
 }
 
 // 词汇统计

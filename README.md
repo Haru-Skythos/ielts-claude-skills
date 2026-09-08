@@ -1,9 +1,11 @@
-# IELTS Claude Skills · v3.0
+# IELTS Claude Skills · v3.1
 
 > 一套跑在 Claude Code 上的、**有记忆的**雅思备考 AI 教练系统。
 > 8 个 skill · 本地数据持久化 · 可视化 Dashboard · 错题本 · 间隔重复词汇 · 数据驱动备考计划。
 >
-> 基于 [YANZHANLIN/ielts-claude-skills](https://github.com/YANZHANLIN/ielts-claude-skills) v1.0（MIT License）自建实现的 v3.0 完整版。纯本地运行，没有任何云端依赖，你的所有学习数据都只存在你自己的电脑上。
+> 基于 [YANZHANLIN/ielts-claude-skills](https://github.com/YANZHANLIN/ielts-claude-skills) v1.0（MIT License）自建实现的 v3.1 完整版。纯本地运行，没有任何云端依赖，你的所有学习数据都只存在你自己的电脑上。
+>
+> **v3.1 增量**：今日建议算法统一（实现与文档同一套 `subjectTargets`，附单测）、词汇复习日志（`vocab/log.md` 全链路）、可复现评测 harness（`evals/`）与知识漂移 lint（`scripts/lint-sync.mjs`）。
 
 ---
 
@@ -38,7 +40,7 @@
 | `/ielts-reading` | T/F/NG 逻辑拆解 + 错题诊断，同义替换跨篇入库 | 「这道为什么错」+ 粘贴文章和答案 |
 | `/ielts-listening` | 听力题型追踪 + 错因诊断 + 精听任务生成 | 「剑 19 T1 错了 10 个」+ 错题清单 |
 | `/ielts-speaking` | 万能故事库（跨会话复用）+ Part 3 预测 + 表达升级 | 「Part 2 描述一次旅行怎么准备」 |
-| `/ielts-vocab` | 生词本 Leitner 间隔重复 + 同义替换专项测验 | 「今天复习单词」「考考我」 |
+| `/ielts-vocab` | 生词本 Leitner 间隔重复 + 同义替换专项测验，复习结算写入 `vocab/log.md` 复习日志 | 「今天复习单词」「考考我」 |
 | `/ielts-plan` | 聚合全部数据做诊断，生成落实到天的训练计划 | 「我现在什么水平」「帮我做计划」 |
 | `/ielts-dashboard` | 本地 React 可视化 + 数据体检 + 状态栏安装 | 「看看我的进度」「打开 dashboard」 |
 
@@ -69,6 +71,8 @@
 ---
 
 ## 系统要求
+
+> **Academic-only 声明**：当前版本（v3.1）仅支持 **Academic（A 类）**——写作 Task 1 指导与评分换算表均按 A 类实现。General Training（G 类）在路线图中，暂不支持。
 
 | 组件 | 要求 | 用途 |
 |------|------|------|
@@ -118,8 +122,8 @@ cp -r ielts ielts-writing ielts-reading ielts-listening ielts-speaking ielts-voc
 
 ```
 你：/ielts
-AI：你的目标分数是多少？考试时间定了吗？考 Academic 还是 General？
-你：目标 7，9 月 20 号，A 类
+AI：你的目标分数是多少？考试时间定了吗？
+你：目标 7，9 月 20 号
 AI：你现在大概什么水平？做过模考吗？
 你：上次考了 6.0，听力 6 阅读 6.5 写作 5.5 口语 5.5
 AI：每天能拿出多少时间备考？
@@ -207,6 +211,8 @@ AI：启动本地网页 http://localhost:5173
 - **添加生词**：丢词进来，自动补全释义 / 搭配 / 雅思例句入库
 - **同义替换专项**：从累计库抽测（阅读听力的解题命脉），库存不足时用内置高频包起步
 - **主题词汇包**：按话题给产出级词汇（雅思 7 分作文用得上的，不给 GRE 冷词）
+
+每次复习结算后向 `vocab/log.md` 追加一行复习日志（日期 / 复习词数 / 对错数），跨会话可回溯复习轨迹，`/ielts-plan` 与 Dashboard 也能消费。
 
 词库完全尊重你的习惯：可加自定义列（记法 / 音标），手改的释义不会被「纠正」，说「这词我熟了」就直接升箱。
 
@@ -381,16 +387,18 @@ Vite 会自动换端口，以启动输出里的实际 URL 为准。
 
 ## 评测数据
 
-v3.0 发布前跑过一轮对照评测（5 个核心场景 × 新版 / 基线各一次，36 条客观断言，基线为 v1.0 旧版或无 skill，详见 `ielts-v3-workspace/iteration-1/benchmark.md`）：
+本仓库提供可复现的评测/回归 harness（`evals/`），当前包含：
 
-| | 断言通过率 | 平均耗时 | 平均 tokens |
-|--|-----------|---------|------------|
-| v3.0 | **97.2%**（35/36） | 574 s | 67.5k |
-| 基线 | 75.0%（27/36） | 507 s | 62.0k |
+- **黄金数据 fixtures**（`evals/fixtures/ielts-home/`）：一份完整的 `~/.ielts` 样例，覆盖单 section 不换算、null sections、自建故事组、词表自定义列与「已掌握」分区等边界，必须通过 `npm run validate`（在 `ielts-dashboard/assets/app/` 下，`IELTS_HOME` 指向 fixtures）
+- **端到端场景**（`evals/scenarios/`）：2 个示范场景（写作批改归档、听力整卷诊断报告），每个定义输入消息、IELTS_HOME 初始态和可机械核对的断言清单（归档路径模式、frontmatter 字段、error_tags ⊆ 标准封闭集、band 换算正确性等）
+- **知识漂移 lint**（`node scripts/lint-sync.mjs`）：校验换算表 4 份拷贝、错误标签集 5 份拷贝的一致性，以及文档中相对路径引用的存在性
+- **结果归档**（`evals/results/`）：每次评测一个 `YYYY-MM-DD-<run-id>/` 目录，append-only
 
-关键结论：基线模型的**教学内容**并不弱，v3 的差距集中在**数据契约**上——标准错误标签（基线自造标签导致聚合失效）、标准归档位置（基线写进自创目录）、词汇沉淀（基线为零）、工具闭环。这正是「跨会话记忆能积累起来」的前提。
+跑法与断言写法见 `evals/README.md`。
 
-已知限制：AI 评分偏高约 0.5 分（业界通病，已内置校准提醒）；单次评测样本量小，欢迎实际使用反馈。
+诚实声明：v3.0 发布前确实跑过一轮对照评测（5 场景 × 36 条断言，v3.0 对基线断言通过率约 97% vs 75%），但该评测的原始记录未随本仓库发布，数字不可独立复核，故此处不再作为质量主张。本仓库当前提供的是上述可复现的回归 harness——欢迎用它跑你自己的评测并把结果归档到 `evals/results/`。
+
+已知限制：AI 评分偏高约 0.5 分（业界通病，已内置校准提醒）；现有场景样本量小，欢迎实际使用反馈。
 
 ---
 
@@ -414,6 +422,8 @@ ielts-claude-skills/
 │       ├── scripts/statusline.mjs  #   状态栏脚本（零依赖）
 │       └── src/                    #   前端（图表组件）
 ├── docs/DATA-SCHEMA.md             # 数据规范（人读版契约）
+├── evals/                          # 评测 harness（fixtures / scenarios / results）
+├── scripts/lint-sync.mjs           # 知识漂移 lint（换算表 / 标签集 / 文档路径）
 ├── install.cmd / install.sh        # 安装脚本
 ├── LICENSE                         # MIT
 └── README.md                       # 本文件
@@ -434,5 +444,6 @@ ielts-claude-skills/
 
 **版本历史**
 
+- **v3.1**（2026-09）：今日建议算法统一（subjectTargets + 单测）、词汇复习日志全链路、可复现评测 harness（evals/）+ 漂移 lint（lint-sync）、声明仅支持 Academic
 - **v3.0**（2026-07）：8 skill + 数据持久化 + Dashboard + 错题本 + 间隔重复 + 计划 + 状态栏 + 备份；数据契约 `*.v3`
 - v1.0（上游）：写作 / 阅读 / 口语 / 路由，无状态纯提示词

@@ -4,7 +4,7 @@ description: |
   雅思写作批改教练（v3）。四维评分 + 句子级标注 + 改写对比 + 审题检查，批改结果自动归档到本地 ~/.ielts/，跨会话追踪分数走势和高频错误。
   用户粘贴英语作文、要求批改/打分/审题/出题、提到雅思写作 Task 1 或 Task 2 时都用这个 skill。
 metadata:
-  version: 3.0.0
+  version: 3.1.0
 ---
 
 # IELTS Writing — 雅思写作批改教练

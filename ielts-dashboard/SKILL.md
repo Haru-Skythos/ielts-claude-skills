@@ -4,7 +4,7 @@ description: |
   雅思备考数据 Dashboard（v3）。启动本地 React 可视化页面（写作趋势图、四科雷达图、错题热力图、同义替换库、考试倒计时、今日建议），并提供数据格式校验、状态栏安装、无 Node 环境的文本版概览。
   用户说「看看我的进度」「打开 dashboard」「数据可视化」「我的错题分布」「装状态栏」「检查数据」时都用这个 skill。
 metadata:
-  version: 3.0.0
+  version: 3.1.0
 ---
 
 # IELTS Dashboard — 备考数据可视化

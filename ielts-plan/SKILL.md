@@ -4,7 +4,7 @@ description: |
   雅思备考诊断与计划教练（v3）。聚合本地所有训练数据做全面诊断（四科差距、练习频次、高频错误、成绩趋势），生成落实到每天的个人化训练计划。
   用户问「我现在什么水平」「还差多少」「该怎么安排」「帮我做备考计划」「离考试还有 N 天怎么办」时都用这个 skill。
 metadata:
-  version: 3.0.0
+  version: 3.1.0
 ---
 
 # IELTS Plan — 备考诊断与计划教练
@@ -33,7 +33,7 @@ metadata:
 1. 读 `profile.md`（目标、考期、现状基线、daily_minutes）。不存在 → 先按 `/ielts` 的方式 3 问建档
 2. Glob 五类数据：`writing/*.md`、`reading/*.md`、`listening/*.md`、`speaking/*.md`、`speaking/stories/*.md`
 3. 对每个文件**只读前 30 行**（frontmatter 就在那里）：拿 date / band / score / total / question_types / error_tags
-4. 读 `vocab/words.md` 和 `vocab/synonyms.md` 的 frontmatter + 数行数（词条量用 `grep -c '^|' 文件` 估算，减去表头 2 行）
+4. 读 `vocab/words.md` 和 `vocab/synonyms.md` 的 frontmatter + 数行数（词条量用 `grep -c '^|' 文件` 估算，减去表头 2 行）；再读 `vocab/log.md`，统计最近 14 天有行的天数（复习天数）和 reviewed 列总和（复习词数）
 5. 归档正文一律不读——诊断用不着，还会撑爆上下文
 6. 旧 `plan.md` 存在就读 frontmatter，对比「上一版计划执行得怎么样」（频次数据能看出来）
 
@@ -84,6 +84,7 @@ metadata:
 
 ## 练习结构
 - 最近 14 天：写作 {n} · 阅读 {n} · 听力 {n} · 口语 {n} · 词汇复习 {n}
+  （词汇复习 {n} = 最近 14 天 `vocab/log.md` 里有行的天数，数据出处是 log.md）
 - 问题：{如「听力差距最大但 14 天只练了 1 次」「口语零记录」}
 
 ## 高频错误 Top 5

@@ -9,6 +9,7 @@ import {
   planSchema,
   synonymsFmSchema,
   vocabFmSchema,
+  vocabLogFmSchema,
   collectionSchemas,
 } from '../server/schema.mjs'
 
@@ -131,6 +132,37 @@ if (fs.existsSync(wordsFile)) {
       problems.push(`vocab/words.md: 行 ${badRows.join(', ')} box 或 next_review 非法`)
     } else {
       console.log(`        表格 ${rows.length} 个词条，结构正常`)
+    }
+  }
+}
+
+const logFile = path.join(root, 'vocab', 'log.md')
+if (fs.existsSync(logFile)) {
+  const fm = checkFile('vocab/log.md', vocabLogFmSchema)
+  if (fm) {
+    const dateRe = /^\d{4}-\d{2}-\d{2}$/
+    const rows = parseTable(readMd(logFile).content)
+    const badRows = []
+    rows.forEach((r, i) => {
+      const reviewed = Number(r['reviewed'])
+      const correct = Number(r['correct'])
+      const wrong = Number(r['wrong'])
+      const nonNegInt = (n) => Number.isInteger(n) && n >= 0
+      if (
+        !dateRe.test(r['date'] ?? '') ||
+        !nonNegInt(reviewed) ||
+        !nonNegInt(correct) ||
+        !nonNegInt(wrong) ||
+        correct + wrong !== reviewed
+      )
+        badRows.push(i + 1)
+    })
+    if (badRows.length) {
+      fail++
+      console.log(`  FAIL  vocab/log.md 表格：第 ${badRows.join(', ')} 行日期或 reviewed/correct/wrong 非法`)
+      problems.push(`vocab/log.md: 行 ${badRows.join(', ')} 日期或数值非法`)
+    } else {
+      console.log(`        表格 ${rows.length} 条复习记录，结构正常`)
     }
   }
 }

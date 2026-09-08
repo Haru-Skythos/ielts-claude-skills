@@ -1,11 +1,12 @@
 import React from 'react'
-import { daysBetween, todayStr, todaySuggestion, vocabStats } from '../lib/derive.js'
+import { daysBetween, todayStr, todaySuggestion, vocabStats, vocabActivity } from '../lib/derive.js'
 
 export default function StatTiles({ data }) {
   const prof = data.profile || {}
   const daysLeft = prof.exam_date ? daysBetween(todayStr(), prof.exam_date) : null
   const sug = todaySuggestion(data)
   const v = vocabStats(data)
+  const va = data.vocabLog?.exists ? vocabActivity(data) : null
 
   return (
     <div className="tiles">
@@ -40,6 +41,17 @@ export default function StatTiles({ data }) {
         </div>
         <div className="sub">已掌握 {v.mastered} · /ielts-vocab 复习</div>
       </div>
+
+      {va && (
+        <div className="tile">
+          <div className="label">14 天词汇复习</div>
+          <div className="value">
+            {va.days}
+            <span className="unit">天 · {va.reviewed} 词</span>
+          </div>
+          <div className="sub">来自 vocab/log.md 复习日志</div>
+        </div>
+      )}
 
       <div className="tile">
         <div className="label">累计资产</div>
