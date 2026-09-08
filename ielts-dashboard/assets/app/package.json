@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "vite",
     "validate": "node scripts/validate.mjs",
-    "statusline": "node scripts/statusline.mjs"
+    "statusline": "node scripts/statusline.mjs",
+    "lint:sync": "node ../../../scripts/lint-sync.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",
