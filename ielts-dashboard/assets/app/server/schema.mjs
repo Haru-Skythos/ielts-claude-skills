@@ -17,6 +17,7 @@ const qtCount = z
 export const profileSchema = z
   .object({
     schema: z.literal('profile.v3'),
+    // 枚举保留 'general' 以兼容旧数据；v3.1 仅支持 academic（General 见路线图）
     test_type: z.enum(['academic', 'general']),
     target_band: band,
     exam_date: dateStr.nullable(),

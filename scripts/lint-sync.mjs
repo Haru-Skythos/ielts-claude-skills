@@ -192,7 +192,7 @@ const pathRepos = ['README.md', 'docs/DATA-SCHEMA.md']
 // 这些是「数据文件名 / 章节锚点」而非仓库路径，跳过
 const pathAllowlist = new Set([
   'profile.md', 'plan.md', 'synonyms.md', 'words.md', 'SKILL.md',
-  'vocab/synonyms.md', 'ielts-v3-workspace/iteration-1/benchmark.md',
+  'vocab/synonyms.md', 'vocab/log.md', 'ielts-v3-workspace/iteration-1/benchmark.md',
 ])
 const extRe = /\.(mjs|md|sh|cmd|js|jsx|json|html)$/
 
