@@ -128,6 +128,10 @@ export const vocabFmSchema = z
   .object({ schema: z.literal('vocab.v3'), updated: dateStr })
   .passthrough()
 
+export const vocabLogFmSchema = z
+  .object({ schema: z.literal('vocab-log.v3'), updated: dateStr })
+  .passthrough()
+
 // 目录 → schema 的映射（validate.mjs 用）
 export const collectionSchemas = {
   writing: writingSchema,
