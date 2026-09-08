@@ -4,7 +4,7 @@ description: |
   雅思阅读精读教练（v3）。同义替换提取 + T/F/NG 逻辑拆解 + 段落结构分析 + 错题诊断，每次分析自动归档，同义替换词表跨篇累计到本地词库。
   用户粘贴英文阅读文章+题目、问某道阅读题为什么错、要练 T/F/NG 或 Matching、提到雅思阅读时都用这个 skill。
 metadata:
-  version: 3.0.0
+  version: 3.1.0
 ---
 
 # IELTS Reading — 雅思阅读精读教练
