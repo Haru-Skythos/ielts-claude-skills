@@ -2,7 +2,7 @@
 name: ielts-vocab
 description: |
   雅思词汇训练教练（v3）。Leitner 间隔重复生词本 + 同义替换专项测验 + 主题词汇包，复习进度持久化在本地，每天自动算出今日该复习哪些词。
-  用户说背单词、复习词汇、记生词、考考我单词、练同义替换、要某话题的高分词汇时都用这个 skill。
+  用户说背单词、复习单词、复习词汇、记生词、考考我、练同义替换、要某话题的高分词汇时都用这个 skill。
 metadata:
   version: 3.1.0
 ---
@@ -28,6 +28,18 @@ metadata:
 ## 数据层
 
 数据根 = `IELTS_HOME` 环境变量（如设置），否则 `~/.ielts/`。文件用 Write/Edit 工具写（UTF-8）。
+
+profile.md 不存在时先按 `/ielts` 的方式 3 问建档。frontmatter 模板（字段必须一致）：
+```yaml
+schema: profile.v3
+test_type: academic
+target_band: 7.0
+exam_date: 2026-09-20   # 不确定写 null
+daily_minutes: 120
+current: {listening: 6.0, reading: 6.5, writing: 5.5, speaking: 5.5}  # 未知写 null
+created: 2026-07-26
+updated: 2026-07-26
+```
 
 ### vocab/words.md（生词本，你的主数据）
 
@@ -108,7 +120,7 @@ date -d "+4 days" +%F 2>/dev/null || date -v+4d +%F   # 4 天后（Linux/Git Bas
 1. `date +%F` 取今天
 2. 读 `words.md`，筛出所有 `next_review <= 今天` 的词（字符串比较即可，格式统一 YYYY-MM-DD）
 3. 队列为空 → 汇报盒子分布 + 最近的复习日，问要不要提前复习 box 1-2 的词或加新词
-4. 队列 > 15 词 → 只取 15 个，优先级：box 小的在前（记忆最不牢），同 box 按 next_review 早的在前。剩下的告知「还有 {n} 个明天继续」
+4. 队列顺序：box 小的在前（记忆最不牢），同 box 按 next_review 早的在前。队列 > 15 词 → 只取 15 个，剩下的告知「还有 {n} 个明天继续」
 
 ### Step 2：逐词测试（一次一词，等用户回答）
 
@@ -120,12 +132,12 @@ date -d "+4 days" +%F 2>/dev/null || date -v+4d +%F   # 4 天后（Linux/Git Bas
 | 3 | **语境**：给挖空例句 → 用户填词（给首字母提示） |
 | 4-5 | **产出**：给中文场景 → 用户用这个词造句（判搭配和语法） |
 
-判定标准：意思对但不精确 = 对（给补充）；想不起来、明显错误、造句搭配错 = 错。
+判定标准：意思对但不精确 = 对（给补充）；想不起来、明显错误、造句搭配错 = 错。每词的 correct/wrong 以**首次判定**为准（当场重造不算）。
 
 ### Step 3：即时反馈
 
 - **答对**：「✓」+ 一句补充（搭配/近义辨析），马上下一词
-- **答错**：给完整词条（释义/搭配/例句/词源联想或谐音，怎么好记怎么来），让用户当场用它造一句，再进下一词
+- **答错**：给完整词条（释义/搭配/例句/词源联想或谐音，怎么好记怎么来），让用户当场用它造一句，再进下一词。当场重造的句子只作巩固，**不改变本轮判定**——该词仍按答错回炉
 
 ### Step 4：结算 + 更新
 
@@ -136,10 +148,10 @@ date -d "+4 days" +%F 2>/dev/null || date -v+4d +%F   # 4 天后（Linux/Git Bas
 - 复习 {n} 词：对 {x} / 错 {y}
 - 升箱：{词列表} | 回炉：{词列表} | 毕业：{词列表}
 - 盒子分布：box1: {n} · box2: {n} · box3: {n} · box4: {n} · box5: {n} · 已掌握: {n}
-- 下次复习：{最近的 next_review 日期}（{n} 个词到期）
+- 下次复习：{最近的 next_review 日期}（{n} 个词到期；n = 主表中该日期到期的词数，不含已掌握）
 ```
 
-最后更新 frontmatter 的 `updated`。
+最后更新 frontmatter 的 `updated`（words.md 和 log.md 都要——log.md 用 Edit 单独改这一行，不算整文件重写）。
 
 ### Step 5：追加复习日志
 
