@@ -434,7 +434,7 @@ ielts-claude-skills/
 
 ## License 与致谢
 
-[MIT](./LICENSE)，随便用、随便改、随便商用。
+[MIT](./LICENSE)，可自由使用、修改和分发，详见许可证原文。
 
 - 上游项目：[YANZHANLIN/ielts-claude-skills](https://github.com/YANZHANLIN/ielts-claude-skills) v1.0 提供了 4 个基础 skill 的教学框架与「用数字管理备考」的核心方法论，本仓库在其 MIT 授权下扩展实现了完整功能集
 - 备考方法论参考了雅思官方评分标准（band descriptors）与剑桥真题社区的通行练习法
