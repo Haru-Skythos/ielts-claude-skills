@@ -30,7 +30,17 @@ metadata:
 数据根 = `IELTS_HOME` 环境变量（如设置），否则 `~/.ielts/`。文件用 Write/Edit 工具写（UTF-8），日期先 `date +%F` 取真实值。
 
 **开场：**
-1. 读 `profile.md` 拿目标分。不存在 → 先按 `/ielts` 的方式 3 问建档，再继续
+1. 读 `profile.md` 拿目标分。不存在 → 先按 `/ielts` 的方式 3 问建档，再继续。profile.md 的 frontmatter 模板（字段必须一致，否则其他 skill 读不到）：
+   ```yaml
+   schema: profile.v3
+   test_type: academic
+   target_band: 7.0
+   exam_date: 2026-09-20   # 不确定写 null
+   daily_minutes: 120
+   current: {listening: 6.0, reading: 6.5, writing: 5.5, speaking: 5.5}  # 未知写 null
+   created: 2026-07-26
+   updated: 2026-07-26
+   ```
 2. Glob `listening/*.md`，如有历史：读最近 1-2 篇 frontmatter（前 30 行），记下分数和 error_tags——本次要对比「老毛病改了没」
 3. 不要全文读历史归档
 

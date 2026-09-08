@@ -30,7 +30,7 @@ metadata:
 
 **你是全量聚合消费者，但只聚合 frontmatter：**
 
-1. 读 `profile.md`（目标、考期、现状基线、daily_minutes）。不存在 → 先按 `/ielts` 的方式 3 问建档
+1. 读 `profile.md`（目标、考期、现状基线、daily_minutes）。不存在 → 先按 `/ielts` 的方式 3 问建档（profile.md frontmatter 模板见 docs/DATA-SCHEMA.md §3.1，字段必须一致）
 2. Glob 五类数据：`writing/*.md`、`reading/*.md`、`listening/*.md`、`speaking/*.md`、`speaking/stories/*.md`
 3. 对每个文件**只读前 30 行**（frontmatter 就在那里）：拿 date / band / score / total / question_types / error_tags
 4. 读 `vocab/words.md` 和 `vocab/synonyms.md` 的 frontmatter + 数行数（词条量用 `grep -c '^|' 文件` 估算，减去表头 2 行）；再读 `vocab/log.md`，统计最近 14 天有行的天数（复习天数）和 reviewed 列总和（复习词数）

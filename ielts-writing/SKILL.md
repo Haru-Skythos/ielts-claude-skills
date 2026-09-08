@@ -2,7 +2,7 @@
 name: ielts-writing
 description: |
   雅思写作批改教练（v3）。四维评分 + 句子级标注 + 改写对比 + 审题检查，批改结果自动归档到本地 ~/.ielts/，跨会话追踪分数走势和高频错误。
-  用户粘贴英语作文、要求批改/打分/审题/出题、提到雅思写作 Task 1 或 Task 2 时都用这个 skill。
+  用户粘贴英语作文、要求批改/打分/审题/出题、提到雅思写作 Task 1 或 Task 2 时都用这个 skill——即使他没提「雅思」二字（贴英文 essay 求评价/修改/打分也算）。
 metadata:
   version: 3.1.0
 ---
@@ -32,7 +32,17 @@ v3：每篇批改自动归档。你能看到用户的历史成绩和高频错误
 数据根 = `IELTS_HOME` 环境变量（如设置），否则 `~/.ielts/`。文件用 Write/Edit 工具写（UTF-8），日期先 `date +%F` 取真实值。
 
 **开场（批改前）：**
-1. 读 `profile.md` 拿目标分。不存在 → 先按 `/ielts` 的方式 3 问建档（目标+考期+现状），再继续
+1. 读 `profile.md` 拿目标分。不存在 → 先按 `/ielts` 的方式 3 问建档（目标+考期+现状），再继续。profile.md 的 frontmatter 模板（字段必须一致，否则其他 skill 读不到）：
+   ```yaml
+   schema: profile.v3
+   test_type: academic
+   target_band: 7.0
+   exam_date: 2026-09-20   # 不确定写 null
+   daily_minutes: 120
+   current: {listening: 6.0, reading: 6.5, writing: 5.5, speaking: 5.5}  # 未知写 null
+   created: 2026-07-26
+   updated: 2026-07-26
+   ```
 2. Glob `writing/*.md`，如有历史：读最近 1 篇的 frontmatter（前 30 行），记下它的分数和 error_tags——批改完要做对比
 3. 不要全文读历史批改，控制上下文
 
@@ -101,8 +111,8 @@ v3：每篇批改自动归档。你能看到用户的历史成绩和高频错误
 ### Phase 1：快速判断
 
 先确认基本信息：
-- Task 1 还是 Task 2？
-- 字数统计（Task 1 ≥ 150，Task 2 ≥ 250，不够直接扣分）
+- Task 1 还是 Task 2：有图表/数据描述（The chart shows...）→ Task 1；有议论题干（To what extent do you agree / Discuss both views）→ Task 2；判断不了就问用户一句
+- 字数：只数正文（不含题目引用），用 `wc -w` 或逐段累加。Task 1 ≥ 150，Task 2 ≥ 250，不够直接扣分
 - 有没有回答题目的所有部分？
 
 ### Phase 2：四维评分
@@ -187,7 +197,7 @@ v3：每篇批改自动归档。你能看到用户的历史成绩和高频错误
 
 ### Phase 4：改写对比
 
-将用户的作文改写成**目标分数版本**（通常是当前分数 +1）。
+将用户的作文改写成**目标分数版本**（基准 = 本篇四维总分 +1，不超过 profile 目标分）。
 
 要求：
 - 保持用户的原始论点和结构不变
@@ -268,11 +278,11 @@ error_tags: [lr-collocation, gra-tense]
 {Phase 5 的完整报告}
 ```
 
-3. **error_tags 从下面的标准标签里选 3-6 个最主要的**（这是错题本和热力图的数据源，标签统一才能聚合）：
+3. **error_tags 从下面的标准标签里选 3-6 个最主要的**（按文中出现频次排，频次相同取对分数影响大的维度；这是错题本和热力图的数据源，标签统一才能聚合）：
 
    `tr-off-topic` 跑题/漏答 · `tr-underdeveloped` 论证不足 · `tr-position-unclear` 立场不清 · `tr-word-count` 字数不足 · `cc-mechanical-linking` 连接词机械 · `cc-paragraph-logic` 段落逻辑乱 · `cc-referencing` 指代不清 · `lr-repetition` 用词重复 · `lr-collocation` 搭配错误 · `lr-word-choice` 用词不当 · `lr-spelling` 拼写 · `gra-simple-sentences` 句型单一 · `gra-subject-verb` 主谓一致 · `gra-tense` 时态 · `gra-article` 冠词 · `gra-word-form` 词性 · `gra-run-on` 流水句
 
-4. **词汇升级沉淀**：把改写中最有复用价值的 3-5 组「基础词 → 升级词」追加到 `<数据根>/vocab/synonyms.md` 表格（列：考点词 | 替换词 | 来源 | 日期；来源写 `writing`；文件不存在就按此表头创建；已有相同词对就跳过；只追加行，不重写文件）
+4. **词汇升级沉淀**：把改写中最有复用价值的 3-5 组「基础词 → 升级词」（优先可跨话题复用的学术表达，排除仅本题适用的词）追加到 `<数据根>/vocab/synonyms.md` 表格（列：考点词 | 替换词 | 来源 | 日期；来源写 `writing`；文件不存在就按此表头创建；已有相同词对就跳过；只追加行，不重写文件）
 5. 最后告诉用户：「已归档 → <路径>」
 
 ---
