@@ -44,7 +44,15 @@ try {
   }
   const todayPart = done.length ? `今日:${done.join('·')} ✓` : '今日:未练'
 
-  console.log(`🎯IELTS ${target ?? '?'}${daysPart} | ${todayPart}`)
+  // 词汇复习日志：今天有行 → 词✓
+  let vocabMark = ''
+  const logFile = path.join(root, 'vocab', 'log.md')
+  if (fs.existsSync(logFile)) {
+    const log = fs.readFileSync(logFile, 'utf8')
+    if (log.split(/\r?\n/).some((l) => l.startsWith(`| ${today} `))) vocabMark = ' · 词✓'
+  }
+
+  console.log(`🎯IELTS ${target ?? '?'}${daysPart} | ${todayPart}${vocabMark}`)
 } catch {
   console.log('IELTS v3')
 }

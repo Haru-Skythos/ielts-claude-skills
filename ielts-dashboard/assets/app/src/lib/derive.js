@@ -186,6 +186,18 @@ export function todaySuggestion(data) {
   return { subject: pick.label, reason }
 }
 
+// 词汇复习日志：最近 N 天有复习记录的天数和总复习词数（vocab/log.md，有行的天才算）
+export function vocabActivity(data, days = 14) {
+  const cutoff = new Date(new Date(todayStr()).getTime() - (days - 1) * 86400000)
+    .toISOString()
+    .slice(0, 10)
+  const rows = (data.vocabLog?.rows || []).filter((r) => r.date && r.date >= cutoff)
+  return {
+    days: rows.length,
+    reviewed: rows.reduce((sum, r) => sum + (r.reviewed || 0), 0),
+  }
+}
+
 // 词汇统计
 export function vocabStats(data) {
   const today = todayStr()
